@@ -45,7 +45,8 @@ class Puzzle:
         return neighbors
 
 # Busca em Largura (BFS)
-def bfs(initial_puzzle, goal_state):
+def bfs(initial_state, goal_state):
+    initial_puzzle = Puzzle(initial_state)
     queue = [initial_puzzle]
     visited = set()
     parent_map = {tuple(initial_puzzle.state): None}  # Map para rastrear pais de cada estado
@@ -71,7 +72,8 @@ def bfs(initial_puzzle, goal_state):
     return None
 
 # Busca em Profundidade (DFS)
-def dfs(initial_puzzle, goal_state):
+def dfs(initial_state, goal_state):
+    initial_puzzle = Puzzle(initial_state)
     stack = [initial_puzzle]
     visited = set()
     parent_map = {tuple(initial_puzzle.state): None}  # Map para rastrear pais de cada estado
@@ -130,8 +132,8 @@ def hamming_distance(puzzle, goal_state):
     return sum(1 for i in range(len(puzzle.state)) if puzzle.state[i] != goal_state[i] and puzzle.state[i] != 0)
 
 # Busca Best First (Greedy) com base em heurísticas
-def greedy_best_first(initial_puzzle, goal_state, heuristic):
-    # Usamos uma lista para armazenar estados ordenados por heurística
+def greedy_best_first(initial_state, goal_state, heuristic):
+    initial_puzzle = Puzzle(initial_state)
     frontier = [(0, initial_puzzle)]
     visited = set()
     parent_map = {tuple(initial_puzzle.state): None}
@@ -149,7 +151,7 @@ def greedy_best_first(initial_puzzle, goal_state, heuristic):
         visited.add(tuple(current_puzzle.state))
         
         for neighbor in current_puzzle.get_neighbors():
-            if tuple(neighbor.state) not em visited:
+            if tuple(neighbor.state) not in visited:
                 heuristic_cost = heuristic(neighbor, goal_state)
                 
                 # Adiciona o vizinho à lista de fronteira
@@ -160,43 +162,48 @@ def greedy_best_first(initial_puzzle, goal_state, heuristic):
     
     return None
 
-# Exemplo de uso
-
+# Função principal
 def main():
-    # Estado inicial (você pode ler do usuário)
-    initial_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]  # Exemplo de estado inicial (vazio na última posição)
-    initial_puzzle = Puzzle(initial_state)
-
-    # Estado final desejado
-    goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]  # Exemplo de estado final (vazio na última posição)
+    # Solicitação dos estados inicial e objetivo
+    initial_state = input("Insira o estado inicial (9 números separados por espaços): ").split()
+    initial_state = [int(num) for num in initial_state]
     
-    # Exemplo de busca em largura
-    path_bfs = bfs(initial_puzzle, goal_state)
-    if path_bfs:
-        print("Solução usando BFS:")
-        for puzzle in path_bfs:
-            print(puzzle.state)
+    goal_state = input("Insira o estado objetivo (9 números separados por espaços): ").split()
+    goal_state = [int(num) for num in goal_state]
     
-    # Exemplo de busca em profundidade
-    path_dfs = dfs(initial_puzzle, goal_state)
-    if path_dfs:
-        print("Solução usando DFS:")
-        for puzzle in path_dfs:
-            print(puzzle.state)
+    # Escolha do algoritmo de busca
+    algorithm = input("Escolha o algoritmo de busca (bfs, dfs, greedy): ")
     
-    # Exemplo de busca gulosa com heurística de Manhattan
-    path_greedy_manhattan = greedy_best_first(initial_puzzle, goal_state, manhattan_distance)
-    if path_greedy_manhattan:
-        print("Solução usando Greedy com Manhattan Distance:")
-        for puzzle in path_greedy_manhattan:
+    # Escolha da heurística (apenas para o algoritmo greedy)
+    heuristic = None
+    if algorithm == 'greedy':
+        heuristic_choice = input("Escolha a heurística (manhattan, hamming): ")
+        if heuristic_choice == 'manhattan':
+            heuristic = manhattan_distance
+        elif heuristic_choice == 'hamming':
+            heuristic = hamming_distance
+        else:
+            print("Heurística não reconhecida.")
+            return
+    
+    # Execução do algoritmo de busca escolhido
+    if algorithm == 'bfs':
+        path = bfs(initial_state, goal_state)
+    elif algorithm == 'dfs':
+        path = dfs(initial_state, goal_state)
+    elif algorithm == 'greedy':
+        path = greedy_best_first(initial_state, goal_state, heuristic)
+    else:
+        print("Algoritmo não reconhecido.")
+        return
+    
+    # Exibir o resultado
+    if path:
+        print("Solução:")
+        for puzzle in path:
             print(puzzle.state)
-
-    # Exemplo de busca gulosa com heurística de Hamming
-    path_greedy_hamming = greedy_best_first(initial_puzzle, goal_state, hamming_distance)
-    if path_greedy_hamming:
-        print("Solução usando Greedy com Hamming Distance:")
-        for puzzle in path_greedy_hamming:
-            print(puzzle.state)
+    else:
+        print("Não foi encontrada uma solução.")
 
 if __name__ == "__main__":
     main()
